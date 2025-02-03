@@ -4,7 +4,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
-model_path = 'sentimentanalysis\\models\\model\\classifier.pkl'
+model_path = "sentimentanalysis/models/model/classifier.pkl"
 classifier = joblib.load(model_path)
 
 def predictfunc(review):    
