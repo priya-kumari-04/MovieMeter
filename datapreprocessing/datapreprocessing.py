@@ -1,4 +1,9 @@
 #Customize stopword as per data
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')  # Required for word_tokenize
+nltk.download('wordnet')  # Required for lemmatization
+
 from nltk.corpus import stopwords
 from sklearn.base import BaseEstimator, TransformerMixin
 from nltk import word_tokenize          
