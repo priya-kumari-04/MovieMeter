@@ -15,9 +15,10 @@ model_path = "sentimentanalysis/models/model/classifier.pkl"
 classifier = joblib.load(model_path)
 
 def predictfunc(review):    
-    prediction = classifier.predict(review)
+    prediction = classifier.predict([review])  # Convert to list
     sentiment = 'Positive' if prediction[0] == 1 else 'Negative'
     return prediction[0], sentiment
+
 
 @app.route('/')
 def index():
