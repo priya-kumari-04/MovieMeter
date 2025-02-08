@@ -66,14 +66,11 @@ class DataCleaning(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        print('calling transform')
-        
-        # Ensure X is a pandas Series
         if isinstance(X, list):
             X = pd.Series(X) 
-        
-        X = X.apply(data_cleaning)  
+        X = X.astype(str).apply(data_cleaning)  
         return X
+
 
 # Lemmatization tokenizer
 class LemmaTokenizer(object):
