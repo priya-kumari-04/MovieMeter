@@ -3,6 +3,10 @@ import joblib
 import pandas as pd
 import nltk
 nltk.download('stopwords')
+nltk.download('punkt')  # Sentence tokenizer
+nltk.download('wordnet')  # Lemmatization
+nltk.download('omw-1.4')  # WordNet corpus
+
 
 
 app = Flask(__name__)
