@@ -62,8 +62,10 @@ class DataCleaning(BaseEstimator,TransformerMixin):
         print('calling fit')
         return self
     def transform(self, X,y=None):
-        print('calling transform')
-        X=X.apply(data_cleaning)
+        if isinstance(X, list):
+        X = pd.Series(X)
+    
+        X = X.apply(data_cleaning)  
         return X
 
 # lemmatization of word 
