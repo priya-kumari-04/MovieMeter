@@ -1,25 +1,40 @@
-# Customize stopwords as per data
 import nltk
 import pandas as pd  # <-- Import pandas
-nltk.download('stopwords')
-nltk.download('punkt')  # Required for word_tokenize
-nltk.download('wordnet')  # Required for lemmatization
+import re
+
+# Download required NLTK resources safely
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords')
+
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+
+try:
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download('wordnet')
 
 from nltk.corpus import stopwords
 from sklearn.base import BaseEstimator, TransformerMixin
 from nltk import word_tokenize          
 from nltk.stem import WordNetLemmatizer
-import re
 
-stop_words = stopwords.words('english')
-new_stopwords = ["mario","la","blah","saturday","monday","sunday","morning","evening","friday","would","shall","could","might"]
-stop_words.extend(new_stopwords)
-stop_words.remove("not")
-stop_words = set(stop_words)
+# Define stopwords
+stop_words = set(stopwords.words('english'))
+new_stopwords = ["mario", "la", "blah", "saturday", "monday", "sunday", "morning", "evening", "friday", "would", "shall", "could", "might"]
+stop_words.update(new_stopwords)
+
+# Ensure "not" is NOT removed
+if "not" in stop_words:
+    stop_words.remove("not")
 
 # Removing special characters
 def remove_special_character(content):
-    return re.sub('\W+',' ', content)
+    return re.sub(r'\W+', ' ', content)
 
 # Removing URLs
 def remove_url(content):
@@ -27,25 +42,26 @@ def remove_url(content):
 
 # Removing stopwords from text
 def remove_stopwords(content):
-    clean_data = []
-    for i in content.split():
-        if i.strip().lower() not in stop_words and i.strip().lower().isalpha():
-            clean_data.append(i.strip().lower())
+    clean_data = [word.strip().lower() for word in content.split() if word.strip().lower() not in stop_words and word.strip().isalpha()]
     return " ".join(clean_data)
 
 # Expanding English contractions
 def contraction_expansion(content):
-    content = re.sub(r"won\'t", "would not", content)
-    content = re.sub(r"can\'t", "can not", content)
-    content = re.sub(r"don\'t", "do not", content)
-    content = re.sub(r"shouldn\'t", "should not", content)
-    content = re.sub(r"needn\'t", "need not", content)
-    content = re.sub(r"hasn\'t", "has not", content)
-    content = re.sub(r"haven\'t", "have not", content)
-    content = re.sub(r"weren\'t", "were not", content)
-    content = re.sub(r"mightn\'t", "might not", content)
-    content = re.sub(r"didn\'t", "did not", content)
-    content = re.sub(r"n\'t", " not", content)
+    contractions = {
+        r"won\'t": "would not",
+        r"can\'t": "can not",
+        r"don\'t": "do not",
+        r"shouldn\'t": "should not",
+        r"needn\'t": "need not",
+        r"hasn\'t": "has not",
+        r"haven\'t": "have not",
+        r"weren\'t": "were not",
+        r"mightn\'t": "might not",
+        r"didn\'t": "did not",
+        r"n\'t": " not"
+    }
+    for pattern, replacement in contractions.items():
+        content = re.sub(pattern, replacement, content)
     return content
 
 # Data preprocessing function
@@ -71,11 +87,12 @@ class DataCleaning(BaseEstimator, TransformerMixin):
         X = X.astype(str).apply(data_cleaning)  
         return X
 
-
 # Lemmatization tokenizer
 class LemmaTokenizer(object):
     def __init__(self):
         self.wordnetlemma = WordNetLemmatizer()
 
     def __call__(self, reviews):
-        return [self.wordnetlemma.lemmatize(word) for word in word_tokenize(reviews)]
+        if isinstance(reviews, str):  # Ensure input is a string
+            return [self.wordnetlemma.lemmatize(word) for word in word_tokenize(reviews)]
+        return []
