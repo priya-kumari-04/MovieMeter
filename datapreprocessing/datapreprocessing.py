@@ -1,5 +1,6 @@
-#Customize stopword as per data
+# Customize stopwords as per data
 import nltk
+import pandas as pd  # <-- Import pandas
 nltk.download('stopwords')
 nltk.download('punkt')  # Required for word_tokenize
 nltk.download('wordnet')  # Required for lemmatization
@@ -9,21 +10,22 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from nltk import word_tokenize          
 from nltk.stem import WordNetLemmatizer
 import re
+
 stop_words = stopwords.words('english')
 new_stopwords = ["mario","la","blah","saturday","monday","sunday","morning","evening","friday","would","shall","could","might"]
 stop_words.extend(new_stopwords)
 stop_words.remove("not")
-stop_words=set(stop_words)
+stop_words = set(stop_words)
 
-#Removing special character
+# Removing special characters
 def remove_special_character(content):
-    return re.sub('\W+',' ', content )#re.sub('\[[^&@#!]]*\]', '', content)
+    return re.sub('\W+',' ', content)
 
-# Removing URL's
+# Removing URLs
 def remove_url(content):
     return re.sub(r'http\S+', '', content)
 
-#Removing the stopwords from text
+# Removing stopwords from text
 def remove_stopwords(content):
     clean_data = []
     for i in content.split():
@@ -31,7 +33,7 @@ def remove_stopwords(content):
             clean_data.append(i.strip().lower())
     return " ".join(clean_data)
 
-# Expansion of english contractions
+# Expanding English contractions
 def contraction_expansion(content):
     content = re.sub(r"won\'t", "would not", content)
     content = re.sub(r"can\'t", "can not", content)
@@ -46,31 +48,37 @@ def contraction_expansion(content):
     content = re.sub(r"n\'t", " not", content)
     return content
 
-#Data preprocessing
+# Data preprocessing function
 def data_cleaning(content):
     content = contraction_expansion(content)
     content = remove_special_character(content)
     content = remove_url(content)
-    
     content = remove_stopwords(content)    
     return content
 
-class DataCleaning(BaseEstimator,TransformerMixin):
+# Custom Transformer for Scikit-Learn Pipelines
+class DataCleaning(BaseEstimator, TransformerMixin):
     def __init__(self):
         print('calling--init--')
-    def fit(self,X,y=None):
+
+    def fit(self, X, y=None):
         print('calling fit')
         return self
-    def transform(self, X,y=None):
+
+    def transform(self, X, y=None):
+        print('calling transform')
+        
+        # Ensure X is a pandas Series
         if isinstance(X, list):
-        X = pd.Series(X)
-    
+            X = pd.Series(X) 
+        
         X = X.apply(data_cleaning)  
         return X
 
-# lemmatization of word 
+# Lemmatization tokenizer
 class LemmaTokenizer(object):
     def __init__(self):
         self.wordnetlemma = WordNetLemmatizer()
+
     def __call__(self, reviews):
         return [self.wordnetlemma.lemmatize(word) for word in word_tokenize(reviews)]
