@@ -21,6 +21,11 @@ from sklearn.metrics import f1_score, roc_auc_score, precision_score, recall_sco
 
 # Loading of data
 import os
+import nltk
+nltk.download('stopwords')  # Ensure stopwords are downloaded
+from nltk.corpus import stopwords
+stop_words = stopwords.words('english')
+
 
 # Print the current working directory to ensure it's correct
 print("Current Working Directory:", os.getcwd())
